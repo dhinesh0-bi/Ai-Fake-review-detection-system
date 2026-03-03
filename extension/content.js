@@ -48,30 +48,31 @@ async function scanReviews() {
 
             let data = await response.json();
 
-            // 4. Inject Red/Green UI Highlighting
-            // 4. Inject Sleek Underline UI Highlighting
+          // 4. Inject Red/Green UI Highlighting
+            // Clear any existing borders first (useful for dynamic pages or rescans)
+            review.style.border = "none";
+            review.style.paddingBottom = "5px"; // Add some space above the line
+            
             if (data.is_fake) {
                 // Apply a thick red underline
-                review.style.borderBottom = "4px solid #ff4d4d";
-                review.style.paddingBottom = "2px"; // Give it a tiny bit of breathing room
+                review.style.borderBottom = "3px solid #ff4d4d";
 
                 // Create a small, non-intrusive badge at the top of the review
                 let badge = document.createElement('div');
-                badge.style.marginBottom = "5px"; // Space between badge and text
+                badge.style.marginBottom = "8px"; // Added more space below badge
                 badge.style.fontSize = "12px";
-                badge.innerHTML = `<span style="background-color: #ff4d4d; color: white; padding: 2px 6px; border-radius: 3px; font-weight: bold;">⚠️ TrustGuard: Fake AI (${data.confidence}%)</span>`;
+                badge.innerHTML = `<span style="background-color: #ff4d4d; color: white; padding: 3px 8px; border-radius: 4px; font-weight: bold;">⚠️ TrustGuard: Fake AI (${data.confidence}%)</span>`;
                 review.prepend(badge);
 
             } else {
                 // Apply a thick green underline
-                review.style.borderBottom = "4px solid #4CAF50";
-                review.style.paddingBottom = "2px";
+                review.style.borderBottom = "3px solid #4CAF50";
 
                 // Create a small, non-intrusive badge at the top
                 let badge = document.createElement('div');
-                badge.style.marginBottom = "5px";
+                badge.style.marginBottom = "8px";
                 badge.style.fontSize = "12px";
-                badge.innerHTML = `<span style="background-color: #4CAF50; color: white; padding: 2px 6px; border-radius: 3px; font-weight: bold;">✅ TrustGuard: Human (${100 - data.confidence}%)</span>`;
+                badge.innerHTML = `<span style="background-color: #4CAF50; color: white; padding: 3px 8px; border-radius: 4px; font-weight: bold;">✅ TrustGuard: Human (${100 - data.confidence}%)</span>`;
                 review.prepend(badge);
             }
         } catch (error) {
