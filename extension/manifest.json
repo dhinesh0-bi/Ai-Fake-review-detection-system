@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "TrustGuard: AI Fake Review Detection",
+  "version": "1.0",
+  "description": "Analyzes E-commerce reviews to detect AI-generated opinion spam.",
+  "permissions": ["activeTab", "scripting"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.amazon.com/*", "*://*.amazon.in/*","*://*.youtube.com/*","*://*.shopify.com/*","*://*.flipkart.com/*","*://*.flipkart.in/*","*://*.meesho.com/*"],
+      "js": ["content.js"]
+    }
+  ]
+}
