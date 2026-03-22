@@ -1,82 +1,184 @@
+// Master Tracking Variables for the Floating Scoreboard
+let totalScanned = 0;
+let fakeCount = 0;
+let realCount = 0;
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "analyze_page") {
-        scanReviews();
-    }
+    if (request.action === "analyze_page") { scanReviews(); }
 });
+
+// Auto-scan every 3 seconds
+setInterval(() => { scanReviews(); }, 3000);
+
 async function scanReviews() {
     let reviews = [];
     let currentURL = window.location.hostname;
 
-    // 1. Identify the website and grab the correct review elements
     if (currentURL.includes("amazon")) {
         reviews = document.querySelectorAll('[data-hook="review-body"]');
-        
     } else if (currentURL.includes("youtube")) {
         reviews = document.querySelectorAll('#content-text');
-        
     } else if (currentURL.includes("flipkart")) {
-        // Flipkart usually stores review text inside this specific div class
         reviews = document.querySelectorAll('div.t-ZTKy > div > div');
-        
     } else if (currentURL.includes("meesho")) {
-        // Meesho's classes change often, but this targets standard comment spans
         reviews = document.querySelectorAll('span.sc-jSUZER, div.sc-ftvSup'); 
-        
     } else if (currentURL.includes("shopify") || document.querySelector('.jdgm-rev-widg')) {
-        // Shopify stores use different review plugins. These are the top 3 most common:
-        // Judge.me (.jdgm-rev__body), Shopify Reviews (.spr-review-content), Loox (.loox-review-content)
         reviews = document.querySelectorAll('.jdgm-rev__body, .spr-review-content, .loox-review-content');
     }
 
-    // 2. Check if we found anything
-    if(reviews.length === 0) {
-        alert("TrustGuard: No reviews found on this page. (The website layout might have changed!)");
-        return;
-    }
+    if(reviews.length === 0) return; 
 
-    // 3. Process the reviews through your Django API
     for (let review of reviews) {
+        if (review.getAttribute("data-tg-scanned") === "true") continue;
+        review.setAttribute("data-tg-scanned", "true");
+
         let reviewText = review.innerText;
-        let rating = 5; // Default assumption
-        
+        if (!reviewText || reviewText.trim() === "") continue; 
+
         try {
+            // 1. Send the review to Django for analysis
             let response = await fetch("https://ai-fake-review-detection-system.onrender.com/analyze", { 
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ text: reviewText, rating: rating })
+                body: JSON.stringify({ text: reviewText, rating: 5 })
             });
 
             let data = await response.json();
 
-          // 4. Inject Red/Green UI Highlighting
-            // Clear any existing borders first (useful for dynamic pages or rescans)
-            review.style.border = "none";
-            review.style.paddingBottom = "5px"; // Add some space above the line
+            // 2. Update Master Counters
+            totalScanned++;
+            if (data.is_fake) fakeCount++;
+            else realCount++;
+
+            // 3. Setup the UI Container
+            review.style.position = "relative"; 
             
+            let statusLine = document.createElement('div');
+            statusLine.style.height = "4px";
+            statusLine.style.width = "100%";
+            statusLine.style.marginBottom = "8px"; 
+            
+            let badgeContainer = document.createElement('div');
+            badgeContainer.style.marginBottom = "5px"; 
+            badgeContainer.style.fontSize = "12px";
+            badgeContainer.style.display = "flex";
+            badgeContainer.style.alignItems = "center";
+            badgeContainer.style.gap = "10px"; // Space between badge and buttons
+
+            // 4. Create the Badge Text
+            let badgeLabel = document.createElement('span');
+            badgeLabel.style.padding = "3px 8px";
+            badgeLabel.style.borderRadius = "4px";
+            badgeLabel.style.fontWeight = "bold";
+            badgeLabel.style.color = "white";
+
             if (data.is_fake) {
-                // Apply a thick red underline
-                review.style.borderBottom = "3px solid #ff4d4d";
-
-                // Create a small, non-intrusive badge at the top of the review
-                let badge = document.createElement('div');
-                badge.style.marginBottom = "8px"; // Added more space below badge
-                badge.style.fontSize = "12px";
-                badge.innerHTML = `<span style="background-color: #ff4d4d; color: white; padding: 3px 8px; border-radius: 4px; font-weight: bold;">⚠️ TrustGuard: Fake AI (${data.confidence}%)</span>`;
-                review.prepend(badge);
-
+                statusLine.style.backgroundColor = "#ff4d4d"; 
+                badgeLabel.style.backgroundColor = "#ff4d4d";
+                badgeLabel.innerText = `⚠️ TrustGuard: Fake AI (${Math.round(data.confidence)}%)`;
             } else {
-                // Apply a thick green underline
-                review.style.borderBottom = "3px solid #4CAF50";
-
-                // Create a small, non-intrusive badge at the top
-                let badge = document.createElement('div');
-                badge.style.marginBottom = "8px";
-                badge.style.fontSize = "12px";
-                badge.innerHTML = `<span style="background-color: #4CAF50; color: white; padding: 3px 8px; border-radius: 4px; font-weight: bold;">✅ TrustGuard: Human (${100 - data.confidence}%)</span>`;
-                review.prepend(badge);
+                statusLine.style.backgroundColor = "#4CAF50"; 
+                badgeLabel.style.backgroundColor = "#4CAF50";
+                badgeLabel.innerText = `✅ TrustGuard: Human (${Math.round(100 - data.confidence)}%)`;
             }
+
+            // 5. Create the Feedback Buttons (The MLOps Feature!)
+            let feedbackWrapper = document.createElement('div');
+            feedbackWrapper.style.display = "flex";
+            feedbackWrapper.style.gap = "8px";
+            feedbackWrapper.style.fontSize = "14px";
+            
+            let btnUp = document.createElement('span');
+            btnUp.innerText = "👍";
+            btnUp.style.cursor = "pointer";
+            btnUp.title = "Prediction is Correct";
+            
+            let btnDown = document.createElement('span');
+            btnDown.innerText = "👎";
+            btnDown.style.cursor = "pointer";
+            btnDown.title = "Prediction is Wrong";
+
+            // Add click events to send data back to server
+            btnUp.onclick = () => submitFeedback(reviewText, data.is_fake, true, feedbackWrapper);
+            btnDown.onclick = () => submitFeedback(reviewText, data.is_fake, false, feedbackWrapper);
+
+            feedbackWrapper.appendChild(btnUp);
+            feedbackWrapper.appendChild(btnDown);
+
+            // Put everything together
+            badgeContainer.appendChild(badgeLabel);
+            badgeContainer.appendChild(feedbackWrapper);
+            review.prepend(statusLine); 
+            review.prepend(badgeContainer); 
+
         } catch (error) {
             console.error("TrustGuard Server Error:", error);
+            review.removeAttribute("data-tg-scanned");
         }
     }
+
+    updateTrustScoreUI();
 }
+
+// Function to send user feedback back to the Django Backend
+async function submitFeedback(text, isPredictedFake, isUserAgree, wrapperElement) {
+    // Immediately hide the buttons and show a "Thank you" message
+    wrapperElement.innerHTML = `<span style="color: #666; font-style: italic; font-size: 11px;">✅ Feedback saved for ML training!</span>`;
+
+    try {
+        await fetch("https://ai-fake-review-detection-system.onrender.com/feedback", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+                text: text, 
+                ai_prediction: isPredictedFake, 
+                user_agreed: isUserAgree 
+            })
+        });
+    } catch (e) {
+        console.error("Failed to send feedback:", e);
+    }
+}
+
+// ... [Keep your exact same `updateTrustScoreUI()` function here at the bottom!] ...
+function updateTrustScoreUI() {
+    if (totalScanned === 0) return;
+
+    let trustPercentage = Math.round((realCount / totalScanned) * 100);
+    
+    let scoreBoard = document.getElementById("trustguard-floating-score");
+    
+    if (!scoreBoard) {
+        scoreBoard = document.createElement("div");
+        scoreBoard.id = "trustguard-floating-score";
+        scoreBoard.style.position = "fixed";
+        scoreBoard.style.bottom = "20px";
+        scoreBoard.style.right = "20px";
+        scoreBoard.style.zIndex = "999999"; 
+        scoreBoard.style.padding = "15px";
+        scoreBoard.style.borderRadius = "10px";
+        scoreBoard.style.fontWeight = "bold";
+        scoreBoard.style.fontFamily = "Arial, sans-serif";
+        scoreBoard.style.boxShadow = "0 4px 15px rgba(0,0,0,0.3)";
+        scoreBoard.style.transition = "all 0.3s ease";
+        document.body.appendChild(scoreBoard);
+    }
+
+    if (trustPercentage >= 70) {
+        scoreBoard.style.backgroundColor = "#e8f5e9";
+        scoreBoard.style.border = "2px solid #4CAF50";
+        scoreBoard.style.color = "#2e7d32";
+        scoreBoard.innerHTML = `
+            <div style="font-size:16px; margin-bottom:5px;">🛡️ Trust Score: ${trustPercentage}%</div>
+            <div style="font-size: 12px; font-weight: normal; color: #333;">${totalScanned} Scanned | ${fakeCount} Fake Detected</div>
+        `;
+    } else {
+        scoreBoard.style.backgroundColor = "#ffebee";
+        scoreBoard.style.border = "2px solid #ff4d4d";
+        scoreBoard.style.color = "#c62828";
+        scoreBoard.innerHTML = `
+            <div style="font-size:16px; margin-bottom:5px;">⚠️ Trust Score: ${trustPercentage}%</div>
+            <div style="font-size: 12px; font-weight: normal; color: #333;">High Risk! | ${totalScanned} Scanned | ${fakeCount} Fake</div>
+        `;
+    }
+} 

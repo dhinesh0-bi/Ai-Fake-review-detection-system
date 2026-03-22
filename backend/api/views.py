@@ -6,6 +6,7 @@ import re
 from textblob import TextBlob
 from scipy.sparse import hstack
 import os
+import csv  # <-- Added for the MLOps Feedback Loop
 
 # Get the path to the backend folder to find the .pkl files
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -62,5 +63,47 @@ def analyze_review(request):
             
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
+            
+    return JsonResponse({"error": "Only POST requests are allowed"}, status=405)
+
+
+# ==========================================
+# NEW MLOPS FEATURE: FEEDBACK LOOP
+# ==========================================
+@csrf_exempt
+def save_feedback(request):
+    if request.method == 'POST':
+        try:
+            # 1. Read the data sent from the Chrome Extension
+            data = json.loads(request.body)
+            text = data.get('text', '')
+            is_fake = data.get('ai_prediction', False)
+            user_agreed = data.get('user_agreed', True)
+
+            # 2. Determine the TRUE label based on the user's vote
+            # CG = Computer Generated (Fake), OR = Original (Real Human)
+            if (is_fake and user_agreed) or (not is_fake and not user_agreed):
+                correct_label = 'CG' 
+            else:
+                correct_label = 'OR'
+
+            # 3. Define the path for the new feedback dataset
+            csv_file_path = os.path.join(BASE_DIR, 'user_feedback.csv')
+            file_exists = os.path.isfile(csv_file_path)
+
+            # 4. Append the new data to the CSV securely
+            with open(csv_file_path, mode='a', newline='', encoding='utf-8') as file:
+                writer = csv.writer(file)
+                # If the file is brand new, write the header row first
+                if not file_exists:
+                    writer.writerow(['Review_Text', 'label']) 
+                
+                # Write the user's reviewed text and the corrected label
+                writer.writerow([text, correct_label])
+
+            return JsonResponse({'status': 'success', 'message': 'Feedback added to dataset'})
+        
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
             
     return JsonResponse({"error": "Only POST requests are allowed"}, status=405)

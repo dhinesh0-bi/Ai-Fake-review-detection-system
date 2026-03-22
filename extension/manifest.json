@@ -9,8 +9,17 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://*.amazon.com/*", "*://*.amazon.in/*","*://*.youtube.com/*","*://*.shopify.com/*","*://*.flipkart.com/*","*://*.flipkart.in/*","*://*.meesho.com/*"],
+      "matches": [
+        "*://*.amazon.com/*", 
+        "*://*.amazon.in/*",
+        "*://*.youtube.com/*",
+        "*://*.shopify.com/*",
+        "*://*.flipkart.com/*",
+        "*://*.flipkart.in/*",
+        "*://*.meesho.com/*"
+      ],
       "js": ["content.js"]
     }
   ]
 }
+
