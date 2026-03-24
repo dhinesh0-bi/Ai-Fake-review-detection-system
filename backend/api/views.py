@@ -1,4 +1,4 @@
-from django.http import JsonResponse, HttpResponse # <-- Added HttpResponse here
+from django.http import JsonResponse, HttpResponse 
 from django.views.decorators.csrf import csrf_exempt
 import json
 import joblib
@@ -7,6 +7,7 @@ from textblob import TextBlob
 from scipy.sparse import hstack
 import os
 import csv  
+from langdetect import detect, LangDetectException # <-- NEW: Language Detection Import
 
 # Get the path to the backend folder to find the .pkl files
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,6 +26,7 @@ def clean_text(text):
     return re.sub(r'[^a-z\s]', '', text)
 
 @csrf_exempt
+@csrf_exempt
 def analyze_review(request):
     if request.method == 'POST':
         try:
@@ -32,6 +34,28 @@ def analyze_review(request):
             data = json.loads(request.body)
             text = data.get('text', '')
             rating = data.get('rating', 5)
+
+            if not text.strip():
+                return JsonResponse({"error": "Empty text provided"}, status=400)
+                
+            # 🛡️ UPDATED GATEKEEPER: Handle Emojis & Short Words!
+            # Strip out emojis and punctuation just for the language check
+            text_for_lang = re.sub(r'[^a-zA-Z\s]', '', text).strip()
+            
+            # Only run the language detector if there is enough text to actually analyze (e.g., > 10 letters)
+            # Short words like "Good", "Nice", or pure emojis will bypass this and go straight to the ML model.
+            if len(text_for_lang) > 10:
+                try:
+                    lang = detect(text_for_lang)
+                    if lang != 'en':
+                        return JsonResponse({
+                            'is_unsupported_language': True,
+                            'detected_language': lang,
+                            'message': 'Only English is supported for ML analysis.'
+                        })
+                except LangDetectException:
+                    # If it still can't figure out the language, let the ML model try its best
+                    pass 
 
             # 2. Process Text using TF-IDF
             cleaned = clean_text(text)
@@ -65,7 +89,6 @@ def analyze_review(request):
             return JsonResponse({"error": str(e)}, status=400)
             
     return JsonResponse({"error": "Only POST requests are allowed"}, status=405)
-
 
 # ==========================================
 # MLOPS FEATURE: FEEDBACK LOOP

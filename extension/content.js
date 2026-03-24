@@ -37,18 +37,13 @@ async function scanReviews() {
 
         try {
             // 1. Send the review to Django for analysis
-            let response = await fetch("https://ai-fake-review-detection-system.onrender.com/analyze", { 
+            let response = await fetch(" http://127.0.0.1:8000/analyze", { 
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ text: reviewText, rating: 5 })
             });
 
             let data = await response.json();
-
-            // 2. Update Master Counters
-            totalScanned++;
-            if (data.is_fake) fakeCount++;
-            else realCount++;
 
             // 3. Setup the UI Container
             review.style.position = "relative"; 
@@ -63,15 +58,34 @@ async function scanReviews() {
             badgeContainer.style.fontSize = "12px";
             badgeContainer.style.display = "flex";
             badgeContainer.style.alignItems = "center";
-            badgeContainer.style.gap = "10px"; // Space between badge and buttons
+            badgeContainer.style.gap = "10px";
 
-            // 4. Create the Badge Text
             let badgeLabel = document.createElement('span');
             badgeLabel.style.padding = "3px 8px";
             badgeLabel.style.borderRadius = "4px";
             badgeLabel.style.fontWeight = "bold";
             badgeLabel.style.color = "white";
 
+            // 🌐 NEW FEATURE: The Unsupported Language Fallback
+            if (data.is_unsupported_language) {
+                statusLine.style.backgroundColor = "#2196F3"; // 🔵 Striking Blue color
+                badgeLabel.style.backgroundColor = "#2196F3";
+                badgeLabel.innerText = `🌐 TrustGuard: English Only`;
+                
+                badgeContainer.appendChild(badgeLabel);
+                review.prepend(statusLine); 
+                review.prepend(badgeContainer); 
+                
+                // CRITICAL: We 'continue' here so we don't count this in our Master Scoreboard or show the 👍/👎 buttons
+                continue; 
+            }
+
+            // 2. Update Master Counters (Only if it's English!)
+            totalScanned++;
+            if (data.is_fake) fakeCount++;
+            else realCount++;
+
+            // 4. Create the ML Badges
             if (data.is_fake) {
                 statusLine.style.backgroundColor = "#ff4d4d"; 
                 badgeLabel.style.backgroundColor = "#ff4d4d";
@@ -82,7 +96,7 @@ async function scanReviews() {
                 badgeLabel.innerText = `✅ TrustGuard: Human (${Math.round(100 - data.confidence)}%)`;
             }
 
-            // 5. Create the Feedback Buttons (The MLOps Feature!)
+            // 5. Create the Feedback Buttons
             let feedbackWrapper = document.createElement('div');
             feedbackWrapper.style.display = "flex";
             feedbackWrapper.style.gap = "8px";
@@ -98,7 +112,6 @@ async function scanReviews() {
             btnDown.style.cursor = "pointer";
             btnDown.title = "Prediction is Wrong";
 
-            // Add click events to send data back to server
             btnUp.onclick = () => submitFeedback(reviewText, data.is_fake, true, feedbackWrapper);
             btnDown.onclick = () => submitFeedback(reviewText, data.is_fake, false, feedbackWrapper);
 
@@ -126,7 +139,7 @@ async function submitFeedback(text, isPredictedFake, isUserAgree, wrapperElement
     wrapperElement.innerHTML = `<span style="color: #666; font-style: italic; font-size: 11px;">✅ Feedback saved for ML training!</span>`;
 
     try {
-        await fetch("https://ai-fake-review-detection-system.onrender.com/feedback", {
+        await fetch(" http://127.0.0.1:8000/feedback", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ 
@@ -140,7 +153,6 @@ async function submitFeedback(text, isPredictedFake, isUserAgree, wrapperElement
     }
 }
 
-// ... [Keep your exact same `updateTrustScoreUI()` function here at the bottom!] ...
 function updateTrustScoreUI() {
     if (totalScanned === 0) return;
 
@@ -181,4 +193,4 @@ function updateTrustScoreUI() {
             <div style="font-size: 12px; font-weight: normal; color: #333;">High Risk! | ${totalScanned} Scanned | ${fakeCount} Fake</div>
         `;
     }
-} 
+}
