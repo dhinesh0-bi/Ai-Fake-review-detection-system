@@ -35,18 +35,16 @@ def analyze_review(request):
             text = data.get('text', '')
             rating = data.get('rating', 5)
 
+           # 🛡️ THE FINAL GATEKEEPER: Raw Text Language Detection!
             if not text.strip():
                 return JsonResponse({"error": "Empty text provided"}, status=400)
                 
-            # 🛡️ UPDATED GATEKEEPER: Handle Emojis & Short Words!
-            # Strip out emojis and punctuation just for the language check
-            text_for_lang = re.sub(r'[^a-zA-Z\s]', '', text).strip()
-            
-            # Only run the language detector if there is enough text to actually analyze (e.g., > 10 letters)
-            # Short words like "Good", "Nice", or pure emojis will bypass this and go straight to the ML model.
-            if len(text_for_lang) > 10:
+            # We ONLY run the detector if the review is longer than 10 characters.
+            # Short words like "Good", "Nice", or emojis will bypass this.
+            if len(text.strip()) > 10:
                 try:
-                    lang = detect(text_for_lang)
+                    # Pass the RAW text so it can actually see Arabic/Tamil/Hindi scripts!
+                    lang = detect(text)
                     if lang != 'en':
                         return JsonResponse({
                             'is_unsupported_language': True,
@@ -54,8 +52,9 @@ def analyze_review(request):
                             'message': 'Only English is supported for ML analysis.'
                         })
                 except LangDetectException:
-                    # If it still can't figure out the language, let the ML model try its best
-                    pass 
+                    # If it's a string of 15 emojis, it will throw an exception. 
+                    # We just 'pass' and let the ML model handle it.
+                    pass
 
             # 2. Process Text using TF-IDF
             cleaned = clean_text(text)
