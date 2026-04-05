@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extension Login</title>
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <div class="login-wrapper">
+        <div class="header">
+            <h2>🛡️ TrustGuard</h2>
+            <p>Sign in to access your dashboard</p>
+        </div>
+
+        <form id="login-form">
+            <div class="input-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" placeholder="you@example.com" required>
+            </div>
+            
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" id="login-btn" class="btn-primary">
+                <span id="btn-text">Sign In</span>
+                <span id="btn-spinner" class="hidden">↻</span>
+            </button>
+        </form>
+
+        <div id="status-message" class="hidden"></div>
+        <div class="divider"><span>OR</span></div>
+
+        <div class="footer">
+            <p>Don't have an account? <a href="signup.html" id="signup-link">Sign up</a></p>
+        </div>
+    </div>
+    
+    <script src="login.js"></script> 
+</body>
+</html>

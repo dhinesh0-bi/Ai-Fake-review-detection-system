@@ -3,9 +3,24 @@
   "name": "TrustGuard: AI Fake Review Detection",
   "version": "1.0",
   "description": "Analyzes E-commerce reviews to detect AI-generated opinion spam.",
-  "permissions": ["activeTab", "scripting"],
-  "action": {
-    "default_popup": "popup.html"
+ "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "identity" 
+  ],
+  "oauth2": {
+    "client_id": "WE_WILL_GET_THIS_IN_THE_NEXT_STEP",
+    "scopes": [
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile"
+    ]
+  },
+
+
+"action": {
+    "default_popup": "login.html",
+    "default_icon": "icon.jpeg"
   },
   "content_scripts": [
     {

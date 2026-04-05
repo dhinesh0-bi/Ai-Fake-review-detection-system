@@ -1,0 +1,206 @@
+/* ==========================================
+   Extension Popup Master Constraints
+   ========================================== */
+body {
+    width: 400px; /* CRITICAL: Fixed pixel width for Chrome Extensions */
+    min-height: 500px; /* Keeps the popup height consistent across pages */
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+}
+
+.login-wrapper {
+    padding: 30px 25px; /* Gives the form breathing room */
+    flex-grow: 1;
+}
+
+/* ==========================================
+   Typography & Headers
+   ========================================== */
+.header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.header h2 {
+    margin: 0;
+    color: #1a1a1a;
+    font-size: 24px;
+}
+
+.header p {
+    margin: 6px 0 0;
+    color: #666;
+    font-size: 14px;
+}
+
+/* ==========================================
+   Form Elements
+   ========================================== */
+.input-group {
+    margin-bottom: 18px;
+}
+
+.input-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #444;
+}
+
+.input-group input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    background-color: white;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #2196F3;
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.15);
+}
+
+/* ==========================================
+   Buttons
+   ========================================== */
+.btn-primary {
+    width: 100%;
+    padding: 12px;
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.btn-primary:hover {
+    background-color: #1976D2;
+}
+
+.btn-primary:disabled {
+    background-color: #90caf9;
+    cursor: not-allowed;
+}
+
+/* ==========================================
+   Google OAuth Elements
+   ========================================== */
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 20px 0;
+    color: #888;
+}
+
+.divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #ddd;
+}
+
+.divider span {
+    padding: 0 10px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.btn-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #444;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.btn-google img {
+    width: 18px;
+    margin-right: 10px;
+}
+
+.btn-google:hover {
+    background-color: #f1f3f4;
+    border-color: #bbb;
+}
+
+/* ==========================================
+   Utilities & Alerts
+   ========================================== */
+.hidden {
+    display: none !important;
+}
+
+#btn-spinner {
+    font-size: 16px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+#status-message {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.status-error {
+    background-color: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+}
+
+.status-success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+}
+
+/* ==========================================
+   Footer
+   ========================================== */
+.footer {
+    margin-top: 25px;
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+}
+
+.footer a {
+    color: #2196F3;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}
