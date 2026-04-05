@@ -97,7 +97,9 @@ def analyze_review(request):
             
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
-            
+        finally:
+            # Force the server to drop all temporary variables from RAM immediately
+            gc.collect()   
     return JsonResponse({"error": "Only POST requests are allowed"}, status=405)
 
 # ==========================================
@@ -135,7 +137,7 @@ def save_feedback(request):
         
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
-            
+        
     return JsonResponse({"error": "Only POST requests are allowed"}, status=405)
 
 

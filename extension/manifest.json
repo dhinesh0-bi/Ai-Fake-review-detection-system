@@ -2,6 +2,10 @@
   "manifest_version": 3,
   "name": "TrustGuard: AI Fake Review Detection",
   "version": "1.0",
+  "host_permissions": [
+    "https://*.amazon.in/*",
+    "http://localhost:8000/*" 
+  ],
   "description": "Analyzes E-commerce reviews to detect AI-generated opinion spam.",
  "permissions": [
     "storage",
