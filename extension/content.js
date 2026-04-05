@@ -37,7 +37,7 @@ async function scanReviews() {
 
         try {
             // 1. Send the review to Django for analysis
-            let response = await fetch("http://localhost:8000/analyze/", { 
+            let response = await fetch(" http://127.0.0.1:8000/api/analyze", { 
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ text: reviewText, rating: 5 })
@@ -139,7 +139,7 @@ async function submitFeedback(text, isPredictedFake, isUserAgree, wrapperElement
     wrapperElement.innerHTML = `<span style="color: #666; font-style: italic; font-size: 11px;">✅ Feedback saved for ML training!</span>`;
 
     try {
-        await fetch("http://localhost:8000/feedback/", {
+        await fetch(" http://127.0.0.1:8000/api/feedback", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ 
