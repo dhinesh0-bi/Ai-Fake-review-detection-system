@@ -7,7 +7,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnSpinner = document.getElementById("btn-spinner");
     const statusMessage = document.getElementById("status-message");
 
-    // 🚀 PASTE YOUR FIREBASE API KEY HERE
     const FIREBASE_API_KEY = "AIzaSyDXF8aIyeLXCBrA980JnXMqkcp6WF1iwuc"; 
 
     signupForm.addEventListener("submit", async (e) => {
@@ -20,7 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
         hideStatus();
 
         try {
-            // Firebase REST API for CREATING a user
             const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_API_KEY}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -36,7 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (response.ok) {
                 showStatus("Account created! Logging you in...", "success");
                 
-                // Save the token instantly so they don't have to log in manually
                 chrome.storage.local.set({ 
                     firebaseToken: data.idToken, 
                     userEmail: data.email,
@@ -47,7 +44,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     }, 1000);
                 });
             } else {
-                // Firebase tells us if the email is already in use
                 let errorMessage = "Registration failed.";
                 if (data.error.message === "EMAIL_EXISTS") {
                     errorMessage = "This email is already registered. Please log in.";
