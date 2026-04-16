@@ -1,9 +1,7 @@
-/* ==========================================
-   Extension Popup Master Constraints
-   ========================================== */
+
 body {
-    width: 400px; /* CRITICAL: Fixed pixel width for Chrome Extensions */
-    min-height: 500px; /* Keeps the popup height consistent across pages */
+    width: 400px;
+    min-height: 500px; 
     margin: 0;
     padding: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -18,9 +16,6 @@ body {
     flex-grow: 1;
 }
 
-/* ==========================================
-   Typography & Headers
-   ========================================== */
 .header {
     text-align: center;
     margin-bottom: 25px;
@@ -38,9 +33,6 @@ body {
     font-size: 14px;
 }
 
-/* ==========================================
-   Form Elements
-   ========================================== */
 .input-group {
     margin-bottom: 18px;
 }
@@ -70,9 +62,6 @@ body {
     box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.15);
 }
 
-/* ==========================================
-   Buttons
-   ========================================== */
 .btn-primary {
     width: 100%;
     padding: 12px;
@@ -99,9 +88,6 @@ body {
     cursor: not-allowed;
 }
 
-/* ==========================================
-   Google OAuth Elements
-   ========================================== */
 .divider {
     display: flex;
     align-items: center;
@@ -148,9 +134,6 @@ body {
     border-color: #bbb;
 }
 
-/* ==========================================
-   Utilities & Alerts
-   ========================================== */
 .hidden {
     display: none !important;
 }
@@ -185,9 +168,6 @@ body {
     border: 1px solid #c8e6c9;
 }
 
-/* ==========================================
-   Footer
-   ========================================== */
 .footer {
     margin-top: 25px;
     text-align: center;
