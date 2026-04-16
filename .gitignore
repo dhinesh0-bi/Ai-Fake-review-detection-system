@@ -1,10 +1,7 @@
-# Ignore Virtual Environment
 .venv/
 backend/.venv/
 
-# Ignore Python Cache
 __pycache__/
 *.pyc
 
-# Ignore Django Database (Optional, but good practice)
 db.sqlite3
