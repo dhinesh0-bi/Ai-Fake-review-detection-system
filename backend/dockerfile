@@ -1,26 +1,17 @@
-# 1. Use an official, lightweight Python 3.12 image
 FROM python:3.12-slim
 
-# 2. Set environment variables to keep Python behavior predictable
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# 3. Set the working directory inside the container
 WORKDIR /app
 
-# 4. Copy ONLY the requirements first (this makes future rebuilds much faster)
 COPY requirements.txt /app/
 
-# 5. Install the dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 6. Copy the rest of your application code (including the .pkl models)
 COPY . /app/
 
-# 7. Expose the port the app will run on
 EXPOSE 8000
-# Change this line:
 
 
-# Keep everything else the same, but update your CMD to explicitly state the path if needed:
 CMD ["gunicorn", "trustguard_backend.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "1", "--threads", "2", "--preload", "--timeout", "120"]
