@@ -1,4 +1,3 @@
-// Master Tracking Variables for the Floating Scoreboard
 let totalScanned = 0;
 let fakeCount = 0;
 let realCount = 0;
@@ -7,7 +6,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "analyze_page") { scanReviews(); }
 });
 
-// Auto-scan every 3 seconds
 setInterval(() => { scanReviews(); }, 3000);
 
 async function scanReviews() {
@@ -36,7 +34,6 @@ async function scanReviews() {
         if (!reviewText || reviewText.trim() === "") continue; 
 
         try {
-            // 1. Send the review to Django for analysis
             let response = await fetch(" http://127.0.0.1:8000/api/analyze", { 
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -45,7 +42,6 @@ async function scanReviews() {
 
             let data = await response.json();
 
-            // 3. Setup the UI Container
             review.style.position = "relative"; 
             
             let statusLine = document.createElement('div');
@@ -66,7 +62,6 @@ async function scanReviews() {
             badgeLabel.style.fontWeight = "bold";
             badgeLabel.style.color = "white";
 
-            // 🌐 NEW FEATURE: The Unsupported Language Fallback
             if (data.is_unsupported_language) {
                 statusLine.style.backgroundColor = "#2196F3"; // 🔵 Striking Blue color
                 badgeLabel.style.backgroundColor = "#2196F3";
@@ -76,16 +71,12 @@ async function scanReviews() {
                 review.prepend(statusLine); 
                 review.prepend(badgeContainer); 
                 
-                // CRITICAL: We 'continue' here so we don't count this in our Master Scoreboard or show the 👍/👎 buttons
                 continue; 
             }
 
-            // 2. Update Master Counters (Only if it's English!)
             totalScanned++;
             if (data.is_fake) fakeCount++;
             else realCount++;
-
-            // 4. Create the ML Badges
             if (data.is_fake) {
                 statusLine.style.backgroundColor = "#ff4d4d"; 
                 badgeLabel.style.backgroundColor = "#ff4d4d";
@@ -96,7 +87,6 @@ async function scanReviews() {
                 badgeLabel.innerText = `✅ TrustGuard: Human (${Math.round(100 - data.confidence)}%)`;
             }
 
-            // 5. Create the Feedback Buttons
             let feedbackWrapper = document.createElement('div');
             feedbackWrapper.style.display = "flex";
             feedbackWrapper.style.gap = "8px";
@@ -118,7 +108,6 @@ async function scanReviews() {
             feedbackWrapper.appendChild(btnUp);
             feedbackWrapper.appendChild(btnDown);
 
-            // Put everything together
             badgeContainer.appendChild(badgeLabel);
             badgeContainer.appendChild(feedbackWrapper);
             review.prepend(statusLine); 
@@ -133,9 +122,7 @@ async function scanReviews() {
     updateTrustScoreUI();
 }
 
-// Function to send user feedback back to the Django Backend
 async function submitFeedback(text, isPredictedFake, isUserAgree, wrapperElement) {
-    // Immediately hide the buttons and show a "Thank you" message
     wrapperElement.innerHTML = `<span style="color: #666; font-style: italic; font-size: 11px;">✅ Feedback saved for ML training!</span>`;
 
     try {
