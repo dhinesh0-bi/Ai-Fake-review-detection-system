@@ -429,7 +429,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 <div align="center">
 
-**Built with ❤️ as a Final Year Project**
+**Built as a Final Year Project**
 
 *TrustGuard — Because every fake review costs a real decision.*
 
